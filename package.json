@@ -4,9 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build:css": "postcss public/styles/tailwind.css -o public/styles/style.css",
-    "dev": "nodemon index.js",
-    "both": "npm run build:css && node index.js"
+    "dev": "nodemon index.js"
   },
   "keywords": [],
   "author": "",
@@ -14,10 +12,8 @@
   "dependencies": {
     "autoprefixer": "^10.2.4",
     "axios": "^0.21.1",
+    "bitbns": "^3.0.12",
     "express": "^4.17.1",
-    "postcss": "^8.2.6",
-    "postcss-cli": "^8.3.1",
-    "pug": "^3.0.0",
-    "tailwindcss": "^2.0.3"
+    "pg": "^8.5.1"
   }
 }
