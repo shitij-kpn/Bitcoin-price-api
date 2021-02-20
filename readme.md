@@ -4,6 +4,6 @@
 
 ![image](/img/database.jpg "photo")
 
-### Format of response
+### Response given from server
 
 ![image](/img/endpoint-response.jpg "endpint response")
