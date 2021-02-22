@@ -95,7 +95,7 @@ app.get('/', async (req, res) => {
       timer,
     });
   } catch (error) {
-    console.log(error);
+    console.error(error);
     res.status(404).json({
       error,
     });

@@ -7,10 +7,10 @@ html(lang="en")
         script(src='https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.1.1/socket.io.min.js')
         title QuadB
     body.dark
-        div.font-sans.bg-gray-800
-            header.bg-gray-800.text-white.pt-4.px-2
-                ul.flex.justify-between.items-center
-                    li.p-2.ml-4.flex-auto
+        div(class="font-sans dark:bg-gray-800 bg-blue-50")
+            header(class="dark:bg-gray-800 dark:text-white bg-gray-100 text-gray-800 pt-4 px-2 shadow-md")
+                ul(class="flex flex-col lg:flex-row justify-between items-center")
+                    li(class="p-2 ml-4 flex-auto")
                         div 
                             div 
                                 span.text-3xl.text-green-300 HODLINFO
@@ -18,33 +18,33 @@ html(lang="en")
                             div 
                                 span Powered By 
                                 span.text-green-300 Finstreet
-                    li.p2.flex-1
+                    li.p-2.flex-1
                         select#currency_from(name="currency_from").select-styles
                             option.appearance-none.rounded-xl(value="INR") INR
                         select#currency_from(name="currency_from").select-styles 
                             option(value="BTC") BTC
-                    l1.p2.mr-4.flex-1
+                    l1.p-2.mr-4.flex-1
                         div.flex.justify-around.items-center
-                            div#timer.border-2.rounded-full.h-8.w-8.text-center.border-green-300.text-green-300 #{timer}
-                            div.flex.justify-center.bg-green-300.px-4.py-2.rounded-lg
+                            div#timer.m-2.border-2.rounded-full.size.text-center.border-green-300.text-green-300 #{timer}
+                            div.flex.m-2.justify-center.bg-green-300.px-4.py-2.rounded-lg
                                 <svg aria-hidden="true" focusable="false" data-prefix="fab" data-icon="telegram-plane" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" class="w-6 h-6"><path fill="currentColor" d="M446.7 98.6l-67.6 318.8c-5.1 22.5-18.4 28.1-37.3 17.5l-103-75.9-49.7 47.8c-5.5 5.5-10.1 10.1-20.7 10.1l7.4-104.9 190.9-172.5c8.3-7.4-1.8-11.5-12.9-4.1L117.8 284 16.2 252.2c-22.1-6.9-22.5-22.1 4.6-32.7L418.2 66.4c18.4-6.9 34.5 4.1 28.5 32.2z"></path></svg>
                                 p Connect Telegram 
-                            div
+                            .m-2 
                                 div.switch
                                     input#switch-1.switch-input(type='checkbox' name="themeChange" checked)
                                     label.switch-label(for='switch-1') Switch
-            main
+            main.overflow-x-auto
                 table(class=' border-separate border-spacing  w-11/12 font-semibold text-center rounded-t-lg m-5 mx-auto text-gray-50')
-                    thead(class=' uppercase text-lg text-left border-b border-gray-300')
+                    thead(class=' uppercase text-base lg:text-lg text-left border-b border-gray-300')
                         th(class=' px-12 py-3 text-gray-500') #
                         th(class=' px-12 py-3 text-gray-500') Platform
                         th(class=' px-12 py-3 text-gray-500') Last
                         th(class=' px-20 py-3 text-gray-500') Buy / Sell Price
                         th(class=' px-12 py-3 text-gray-500') Difference 
                         th(class=' px-12 py-3 text-gray-500') Savings
-                    tbody.text-lg 
+                    tbody(class="text-base lg:text-lg")
                         each item,index in data
-                            tr(class='bg-gray-700 rounded-md border-b border-gray-600')
+                            tr(class='bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-50 rounded-md border-b border-gray-600')
                                 td(class='px-4 py-3')= index+1
                                 td(class='px-4 py-3')= item.platform
                                 td(class='px-4 py-3') ₹ #{item.last.toString().replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ',')}

@@ -4,7 +4,11 @@
 
 @layer utilities {
   .select-styles {
-    @apply appearance-none rounded-xl bg-gray-600 py-1 px-3 mx-2;
+    @apply appearance-none bg-green-400 dark:bg-gray-600  rounded-xl text-white py-1 px-3 mx-2;
+  }
+  .size {
+    min-height: 2rem;
+    min-width: 2rem;
   }
   .switch {
     position: relative;
