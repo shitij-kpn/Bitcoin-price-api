@@ -15,31 +15,21 @@ const app = express();
 
 const getData = async (time = new Date().getTime()) => {
   console.log("fetching new data");
-  let data = [];
+  const bitbnsData = getBitbns();
+  const wazirData = getWazirxData();
+  const giottusData = getGiottusData();
+  let colodaxData = getColodaxData();
+  const zebpayData = getZebpayData();
+  const coindcxData = getCoindcxData();
 
-  //get bitbns data
-  const bitbnsData = await getBitbns();
-  data = [...data, bitbnsData];
-
-  //get wazirX data
-  const wazirData = await getWazirxData();
-  data = [...data, wazirData];
-
-  // get giottus data
-  const giottusData = await getGiottusData();
-  data = [...data, giottusData];
-
-  // get colodax data
-  let colodaxData = await getColodaxData();
-  data = [...data, colodaxData];
-
-  // get zebpay data
-  const zebpayData = await getZebpayData();
-  data = [...data, zebpayData];
-
-  //get coindcx data
-  const coindcxData = await getCoindcxData();
-  data = [...data, coindcxData];
+  const data = await Promise.all([
+    wazirData,
+    bitbnsData,
+    giottusData,
+    zebpayData,
+    coindcxData,
+    colodaxData,
+  ]);
 
   //calculate avg of last sell
   let avg = 0;
