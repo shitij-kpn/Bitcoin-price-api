@@ -1,14 +1,23 @@
 const socket = io('http://localhost:8090');
-
 const tableRows = document.querySelector('tbody');
+const timer = document.querySelector('#timer');
+const checkbox = document.querySelector('input[name=themeChange]');
+const body = document.querySelector('body');
 
-socket.on('connect', () => {
-  console.log(socket.id);
-});
+let counter;
 
 const addCommasToNumbers = (num) => {
   return num.toString().replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ',');
 };
+
+socket.on('connect', () => {
+  console.log('connected to the socket');
+});
+
+socket.on('timer', (res) => {
+  counter = res.timer;
+  timer.innerHTML = counter;
+});
 
 const renderData = ({ data }) => {
   const string =
@@ -34,4 +43,18 @@ const renderData = ({ data }) => {
 
 socket.on('newData', (res) => {
   renderData(res);
+});
+
+checkbox.addEventListener('change', function () {
+  if (this.checked) {
+    this.checked = true;
+    console.log('going dark');
+    body.classList.add('dark');
+    body.classList.remove('light');
+  } else {
+    this.checked = false;
+    console.log('going light');
+    body.classList.add('light');
+    body.classList.remove('dark');
+  }
 });

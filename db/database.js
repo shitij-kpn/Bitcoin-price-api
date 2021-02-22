@@ -2,7 +2,7 @@ const { Client } = require('pg');
 
 const getDB = async () => {
   return new Client({
-    connectionString: '',
+    connectionString: 'postgres://postgres:endencre@localhost:5432/postgres',
   });
 };
 

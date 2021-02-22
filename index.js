@@ -25,23 +25,18 @@ app.use(express.static(path.join(__dirname, 'public')));
 // app.use(cors);
 
 let clients = [];
+let timer = 60;
 
 const getData = async (time = new Date().getTime()) => {
   console.log('fetching new data');
-  const bitbnsData = getBitbns();
-  const wazirData = getWazirxData();
-  const giottusData = getGiottusData();
-  const colodaxData = getColodaxData();
-  const zebpayData = getZebpayData();
-  const coindcxData = getCoindcxData();
 
   const data = await Promise.all([
-    wazirData,
-    bitbnsData,
-    giottusData,
-    zebpayData,
-    coindcxData,
-    colodaxData,
+    getBitbns(),
+    getWazirxData(),
+    getGiottusData(),
+    getColodaxData(),
+    getZebpayData(),
+    getCoindcxData(),
   ]);
 
   //calculate avg of last sell
@@ -62,13 +57,15 @@ const getData = async (time = new Date().getTime()) => {
   }
 
   ///write data to database
-  // await writeData(time, JSON.stringify(data));
+  await writeData(time, JSON.stringify(data));
+
   if (clients.length > 0) {
     console.log('broadcasting');
     io.sockets.emit('newData', { data });
   } else {
     console.log('there are no clients');
   }
+  timer = 60;
 };
 
 setInterval(() => {
@@ -77,18 +74,26 @@ setInterval(() => {
 
 io.on('connect', (socket) => {
   clients = [...clients, socket];
-  console.log('new client connected');
   socket.on('disconnect', () => {
     console.log('user disconnected');
     clients = clients.filter((user) => user.id !== socket.id);
   });
 });
 
+setInterval(() => {
+  timer = timer > 0 ? --timer : 60;
+
+  io.sockets.emit('timer', { timer: timer });
+}, 1000);
+
 app.get('/', async (req, res) => {
   try {
     const data = await readData();
     console.log('rendering');
-    res.render('index', { data: data.maindata });
+    res.render('index', {
+      data: data.maindata,
+      timer,
+    });
   } catch (error) {
     console.log(error);
     res.status(404).json({
