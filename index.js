@@ -18,7 +18,7 @@ const getData = async (time = new Date().getTime()) => {
   const bitbnsData = getBitbns();
   const wazirData = getWazirxData();
   const giottusData = getGiottusData();
-  let colodaxData = getColodaxData();
+  const colodaxData = getColodaxData();
   const zebpayData = getZebpayData();
   const coindcxData = getCoindcxData();
 
@@ -48,6 +48,7 @@ const getData = async (time = new Date().getTime()) => {
     data[i].savings = Math.floor(avg - data[i].last);
   }
 
+  ///write data to database
   await writeData(time, JSON.stringify(data));
 };
 
