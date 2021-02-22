@@ -2,7 +2,7 @@ const { Client } = require('pg');
 
 const getDB = async () => {
   return new Client({
-    connectionString: '',
+    connectionString: 'postgres://postgres:endencre@localhost:5432/postgres',
   });
 };
 
@@ -14,7 +14,7 @@ const readData = async () => {
       'SELECT * FROM bitcoin ORDER BY id DESC LIMIT 1'
     );
     db.end();
-    return rows;
+    return rows[0];
   } catch (error) {
     console.log(error);
     return {
