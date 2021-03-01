@@ -8,6 +8,23 @@ const getDB = async () => {
   });
 };
 
+const readData = async () => {
+  try {
+    const db = await getDB();
+    await db.connect();
+    const { rows } = await db.query(
+      'SELECT * FROM iostbtc ORDER BY id DESC LIMIT 1'
+    );
+    db.end();
+    return rows[0];
+  } catch (error) {
+    console.log(error);
+    return {
+      message: error,
+    };
+  }
+};
+
 const writeData = async (...args) => {
   try {
     const db = await getDB();
