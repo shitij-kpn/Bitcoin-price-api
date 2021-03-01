@@ -2,9 +2,17 @@ const axios = require('axios');
 
 const { Pool } = require('pg');
 
+/*
+create table iostbtc(
+    id serial,
+    timestamp varchar(255) primary key,
+    maindata jsonb,
+)
+*/
+
 const getDB = async () => {
   return new Pool({
-    connectionString: process.env.DATABASE_URL,
+    connectionString: 'postgres://postgres:endencre@localhost:5432/postgres',
   });
 };
 
@@ -46,9 +54,9 @@ const getWazirxData = async () => {
   const wazir = await axios.get('https://api.wazirx.com/api/v2/tickers');
   return {
     platform: 'WazirX',
-    last: Math.floor(wazir.data.iostbtc.last).toString(),
-    buy: Math.floor(wazir.data.iostbtc.buy).toString(),
-    sell: Math.floor(wazir.data.iostbtc.sell).toString(),
+    last: wazir.data.iostbtc.last.toString(),
+    buy: wazir.data.iostbtc.buy.toString(),
+    sell: wazir.data.iostbtc.sell.toString(),
   };
 };
 
@@ -58,32 +66,32 @@ const getCoindcxData = async () => {
 
   return {
     platform: 'CoinDCX',
-    last: Math.floor(coindcxData.last_price).toString(),
-    buy: Math.floor(coindcxData.bid).toString(),
-    sell: Math.floor(coindcxData.ask).toString(),
+    last: coindcxData.last_price.toString(),
+    buy: coindcxData.bid.toString(),
+    sell: coindcxData.ask.toString(),
   };
 };
 
-const fetchIOST = async () => {
-  const time = new Date().getTime();
+const fetchIOST = async (time = new Date().getTime()) => {
   const data = await Promise.all([getWazirxData(), getCoindcxData()]);
-
   let avg = 0;
   for (i in data) {
-    avg = avg + parseInt(data[i].last);
+    avg = avg + parseFloat(data[i].last);
   }
   avg /= data.length;
 
   for (i in data) {
-    data[i].difference = (((avg - data[i].last) / avg) * 100).toFixed(2);
+    data[i].difference = (((avg - data[i].last) / avg) * 100).toString();
   }
 
   for (i in data) {
-    data[i].savings = Math.floor(avg - data[i].last);
+    data[i].savings = (avg - data[i].last).toString();
   }
 
   await writeData(time, JSON.stringify(data));
 };
+
+fetchIOST();
 
 setTimeout(() => {
   fetchIOST();
