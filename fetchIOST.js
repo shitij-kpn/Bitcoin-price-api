@@ -3,7 +3,7 @@ const axios = require('axios');
 const { Pool } = require('pg');
 
 const getDB = async () => {
-  return new Client({
+  return new Pool({
     connectionString: process.env.DATABASE_URL,
   });
 };
