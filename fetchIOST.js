@@ -93,6 +93,6 @@ const fetchIOST = async (time = new Date().getTime()) => {
 
 fetchIOST();
 
-setTimeout(() => {
+setInterval(() => {
   fetchIOST();
 }, 60000);
