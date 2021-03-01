@@ -5,12 +5,12 @@ const { Pool } = require('pg');
 const bitbnsApi = require('bitbns');
 
 const bitbns = new bitbnsApi({
-  apiKey: 'D69275A2AC770255A5D1F3416F6D9BCC',
-  apiSecretKey: 'C35FF964E33646802327C9C3696562FA',
+  apiKey: '',
+  apiSecretKey: '',
 });
 
 /*
-create table xrpinr(
+create table trxinr(
     id serial,
     timestamp varchar(255) primary key,
     maindata jsonb,
@@ -28,7 +28,7 @@ const readData = async () => {
     const db = await getDB();
     await db.connect();
     const { rows } = await db.query(
-      'SELECT * FROM xrpinr ORDER BY id DESC LIMIT 1'
+      'SELECT * FROM trxinr ORDER BY id DESC LIMIT 1'
     );
     db.end();
     return rows[0];
@@ -45,7 +45,7 @@ const writeData = async (...args) => {
     const db = await getDB();
     await db.connect();
     const { rows } = await db.query(
-      'insert into xrpinr(timestamp,maindata) values($1,$2)',
+      'insert into trxinr(timestamp,maindata) values($1,$2)',
       args
     );
     console.log('insterting into db');
@@ -158,7 +158,7 @@ const fetchTRX = async (time = new Date().getTime()) => {
   }
 
   console.table(data);
-  //   await writeData(time, JSON.stringify(data));
+  await writeData(time, JSON.stringify(data));
 };
 
 fetchTRX();
