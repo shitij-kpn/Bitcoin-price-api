@@ -5,8 +5,8 @@ const { Pool } = require('pg');
 const bitbnsApi = require('bitbns');
 
 const bitbns = new bitbnsApi({
-  apiKey: 'D69275A2AC770255A5D1F3416F6D9BCC',
-  apiSecretKey: 'C35FF964E33646802327C9C3696562FA',
+  apiKey: '',
+  apiSecretKey: '',
 });
 
 /*
