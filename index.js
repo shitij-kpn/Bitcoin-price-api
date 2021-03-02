@@ -2,13 +2,19 @@ const express = require('express');
 const path = require('path');
 const socketio = require('socket.io');
 const app = express();
-const server = require('http').createServer(app);
+const server = require('http').createServer(
+  app,
+  (options = {
+    cors: true,
+    origins: ['http://127.0.0.1:5347'],
+  })
+);
 const io = socketio(server);
 
-// const cors = require('cors');
+const cors = require('cors');
 
 //importing util modules
-const getBitbns = require('./utils/bitbnsapi');
+// const getBitbns = require('./utils/bitbnsapi');
 const getWazirxData = require('./utils/wazirxapi');
 const getGiottusData = require('./utils/giottusapi');
 const getColodaxData = require('./utils/colodaxapi');
@@ -22,7 +28,7 @@ app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'pug');
 app.use(express.static(path.join(__dirname, 'public')));
 
-// app.use(cors);
+app.use(cors);
 
 let clients = [];
 let timer = 60;
@@ -31,7 +37,6 @@ const getData = async (time = new Date().getTime()) => {
   console.log('fetching new data');
 
   const data = await Promise.all([
-    getBitbns(),
     getWazirxData(),
     getGiottusData(),
     getColodaxData(),
@@ -56,6 +61,9 @@ const getData = async (time = new Date().getTime()) => {
     data[i].savings = Math.floor(avg - data[i].last);
   }
 
+  for (i in data) {
+    data[i].index = Number(i) + 1;
+  }
   ///write data to database
   await writeData(time, JSON.stringify(data));
 
@@ -72,8 +80,11 @@ setInterval(() => {
   getData();
 }, 60000);
 
-io.on('connect', (socket) => {
+io.on('connect', async (socket) => {
+  console.log('user Connected');
   clients = [...clients, socket];
+  const data = await readData();
+  socket.emit('initialData', { data });
   socket.on('disconnect', () => {
     console.log('user disconnected');
     clients = clients.filter((user) => user.id !== socket.id);
