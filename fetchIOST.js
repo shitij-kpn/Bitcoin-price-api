@@ -1,6 +1,8 @@
 const axios = require('axios');
+const getWazirxData = require('./utils/wazirxapi')
+const getCoindcxData = require('./utils/coindcxapi')
 
-const { Pool } = require('pg');
+// const { Pool } = require('pg');
 
 /*
 create table iostbtc(
@@ -10,47 +12,47 @@ create table iostbtc(
 )
 */
 
-const getDB = async () => {
-  return new Pool({
-    connectionString: 'postgres://postgres:endencre@localhost:5432/postgres',
-  });
-};
+// const getDB = async () => {
+//   return new Pool({
+//     connectionString: 'postgres://postgres:endencre@localhost:5432/postgres',
+//   });
+// };
 
-const readData = async () => {
-  try {
-    const db = await getDB();
-    await db.connect();
-    const { rows } = await db.query(
-      'SELECT * FROM iostbtc ORDER BY id DESC LIMIT 1'
-    );
-    db.end();
-    return rows[0];
-  } catch (error) {
-    console.log(error);
-    return {
-      message: error,
-    };
-  }
-};
+// const readData = async () => {
+//   try {
+//     const db = await getDB();
+//     await db.connect();
+//     const { rows } = await db.query(
+//       'SELECT * FROM iostbtc ORDER BY id DESC LIMIT 1'
+//     );
+//     db.end();
+//     return rows[0];
+//   } catch (error) {
+//     console.log(error);
+//     return {
+//       message: error,
+//     };
+//   }
+// };
 
-const writeData = async (...args) => {
-  try {
-    const db = await getDB();
-    await db.connect();
-    const { rows } = await db.query(
-      'insert into iostbtc(timestamp,maindata) values($1,$2)',
-      args
-    );
-    console.log('insterting into db');
-    db.end();
-    return rows;
-  } catch (error) {
-    console.error(error);
-    return error;
-  }
-};
+// const writeData = async (...args) => {
+//   try {
+//     const db = await getDB();
+//     await db.connect();
+//     const { rows } = await db.query(
+//       'insert into iostbtc(timestamp,maindata) values($1,$2)',
+//       args
+//     );
+//     console.log('insterting into db');
+//     db.end();
+//     return rows;
+//   } catch (error) {
+//     console.error(error);
+//     return error;
+//   }
+// };
 
-const getWazirxData = async () => {
+const getWazirxIOSTBTC = async () => {
   const wazir = await axios.get('https://api.wazirx.com/api/v2/tickers');
   return {
     platform: 'WazirX',
@@ -60,9 +62,15 @@ const getWazirxData = async () => {
   };
 };
 
-const getCoindcxData = async () => {
+const getCoindcxIostToBtc = async () => {
   const coindcx = await axios.get('https://public.coindcx.com/exchange/ticker');
-  const coindcxData = coindcx.data[55];
+  let coindcxData = {};
+  for(i in coindcx.data){
+    if(coindcx.data[i].market === 'IOSTBTC'){
+      coindcxData = coindcx.data[i];
+      break;
+    }
+  }
 
   return {
     platform: 'CoinDCX',
@@ -73,7 +81,20 @@ const getCoindcxData = async () => {
 };
 
 const fetchIOST = async (time = new Date().getTime()) => {
-  const data = await Promise.all([getWazirxData(), getCoindcxData()]);
+  const iostToBtcData = await Promise.all([getWazirxIOSTBTC(),getCoindcxIostToBtc()]);
+  const btcToInrData = await Promise.all([getWazirxData(),getCoindcxData()])
+  let data = [];
+  for(i in iostToBtcData){
+    data = [
+      ...data,
+      {
+        platform: iostToBtcData[i].platform,
+        last: (parseFloat(iostToBtcData[i].last) * Number(btcToInrData[i].last)).toFixed(8),
+        buy: (parseFloat(iostToBtcData[i].buy) * Number(btcToInrData[i].buy)).toFixed(8),
+        sell: (parseFloat(iostToBtcData[i].sell) * Number(btcToInrData[i].sell)).toFixed(8),
+      }
+    ]
+  }
   let avg = 0;
   for (i in data) {
     avg = avg + parseFloat(data[i].last);
@@ -81,14 +102,14 @@ const fetchIOST = async (time = new Date().getTime()) => {
   avg /= data.length;
 
   for (i in data) {
-    data[i].difference = (((avg - data[i].last) / avg) * 100).toString();
+    data[i].difference = (((avg - data[i].last) / avg) * 100).toFixed(8);
   }
 
   for (i in data) {
-    data[i].savings = (avg - data[i].last).toString();
+    data[i].savings = (avg - data[i].last).toFixed(8);
   }
-
-  await writeData(time, JSON.stringify(data));
+  console.log(data);
+  // await writeData(time, JSON.stringify(data));
 };
 
 fetchIOST();

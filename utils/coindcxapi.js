@@ -2,7 +2,13 @@ const axios = require('axios');
 
 const getCoindcxData = async () => {
   const coindcx = await axios.get('https://public.coindcx.com/exchange/ticker');
-  const coindcxData = coindcx.data[0];
+  let coindcxData = {};
+  for(i in coindcx.data){
+    if(coindcx.data[i].market === 'BTCINR'){
+      coindcxData = coindcx.data[i];
+      break;
+    }
+  }
 
   return {
     platform: 'CoinDCX',

@@ -6,7 +6,6 @@ const server = require('http').createServer(
   app,
   (options = {
     cors: true,
-    origins: ['http://127.0.0.1:5347'],
   })
 );
 const io = socketio(server);
@@ -22,7 +21,7 @@ const getZebpayData = require('./utils/zebpayapi');
 const getCoindcxData = require('./utils/coindcxapi');
 
 //importing database modules
-const { writeData, readData } = require('./db/database');
+// const { writeData, readData } = require('./db/database');
 
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'pug');
@@ -65,7 +64,7 @@ const getData = async (time = new Date().getTime()) => {
     data[i].index = Number(i) + 1;
   }
   ///write data to database
-  await writeData(time, JSON.stringify(data));
+  // await writeData(time, JSON.stringify(data));
 
   if (clients.length > 0) {
     console.log('broadcasting');
@@ -83,8 +82,8 @@ setInterval(() => {
 io.on('connect', async (socket) => {
   console.log('user Connected');
   clients = [...clients, socket];
-  const data = await readData();
-  socket.emit('initialData', { data });
+  // const data = await readData();
+  // socket.emit('initialData', { data });
   socket.on('disconnect', () => {
     console.log('user disconnected');
     clients = clients.filter((user) => user.id !== socket.id);
@@ -99,10 +98,10 @@ setInterval(() => {
 
 app.get('/', async (req, res) => {
   try {
-    const data = await readData();
+    // const data = await readData();
     console.log('rendering');
     res.render('index', {
-      data: data.maindata,
+      // data: data.maindata,
       timer,
     });
   } catch (error) {
@@ -113,7 +112,7 @@ app.get('/', async (req, res) => {
   }
 });
 
-server.listen(8090, () => {
+server.listen(8080, () => {
   getData();
   console.log('running on 8090');
 });
