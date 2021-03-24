@@ -1,11 +1,11 @@
 const axios = require('axios');
-const getWazirxData = require('./utils/wazirxapi')
-const getCoindcxData = require('./utils/coindcxapi')
+const getWazirxData = require('./utils/wazirxapi');
+const getCoindcxData = require('./utils/coindcxapi');
 
 // const { Pool } = require('pg');
 
 /*
-create table iostbtc(
+create table iostinr(
     id serial,
     timestamp varchar(255) primary key,
     maindata jsonb,
@@ -14,7 +14,7 @@ create table iostbtc(
 
 // const getDB = async () => {
 //   return new Pool({
-//     connectionString: 'postgres://postgres:endencre@localhost:5432/postgres',
+//     connectionString: 'postgres://postgres:postgres@localhost:5432/postgres',
 //   });
 // };
 
@@ -23,7 +23,7 @@ create table iostbtc(
 //     const db = await getDB();
 //     await db.connect();
 //     const { rows } = await db.query(
-//       'SELECT * FROM iostbtc ORDER BY id DESC LIMIT 1'
+//       'SELECT * FROM iostinr ORDER BY id DESC LIMIT 1'
 //     );
 //     db.end();
 //     return rows[0];
@@ -40,7 +40,7 @@ create table iostbtc(
 //     const db = await getDB();
 //     await db.connect();
 //     const { rows } = await db.query(
-//       'insert into iostbtc(timestamp,maindata) values($1,$2)',
+//       'insert into iostinr(timestamp,maindata) values($1,$2)',
 //       args
 //     );
 //     console.log('insterting into db');
@@ -62,11 +62,11 @@ const getWazirxIOSTBTC = async () => {
   };
 };
 
-const getCoindcxIostToBtc = async () => {
+const getCoindcxIostBtc = async () => {
   const coindcx = await axios.get('https://public.coindcx.com/exchange/ticker');
   let coindcxData = {};
-  for(i in coindcx.data){
-    if(coindcx.data[i].market === 'IOSTBTC'){
+  for (i in coindcx.data) {
+    if (coindcx.data[i].market === 'IOSTBTC') {
       coindcxData = coindcx.data[i];
       break;
     }
@@ -81,19 +81,28 @@ const getCoindcxIostToBtc = async () => {
 };
 
 const fetchIOST = async (time = new Date().getTime()) => {
-  const iostToBtcData = await Promise.all([getWazirxIOSTBTC(),getCoindcxIostToBtc()]);
-  const btcToInrData = await Promise.all([getWazirxData(),getCoindcxData()])
+  const iostToBtcData = await Promise.all([
+    getWazirxIOSTBTC(),
+    getCoindcxIostBtc(),
+  ]);
+  const btcToInrData = await Promise.all([getWazirxData(), getCoindcxData()]);
   let data = [];
-  for(i in iostToBtcData){
+  for (i in iostToBtcData) {
     data = [
       ...data,
       {
         platform: iostToBtcData[i].platform,
-        last: (parseFloat(iostToBtcData[i].last) * Number(btcToInrData[i].last)).toFixed(8),
-        buy: (parseFloat(iostToBtcData[i].buy) * Number(btcToInrData[i].buy)).toFixed(8),
-        sell: (parseFloat(iostToBtcData[i].sell) * Number(btcToInrData[i].sell)).toFixed(8),
-      }
-    ]
+        last: (
+          parseFloat(iostToBtcData[i].last) * Number(btcToInrData[i].last)
+        ).toFixed(8),
+        buy: (
+          parseFloat(iostToBtcData[i].buy) * Number(btcToInrData[i].buy)
+        ).toFixed(8),
+        sell: (
+          parseFloat(iostToBtcData[i].sell) * Number(btcToInrData[i].sell)
+        ).toFixed(8),
+      },
+    ];
   }
   let avg = 0;
   for (i in data) {
