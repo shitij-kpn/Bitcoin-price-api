@@ -16,6 +16,7 @@ const readData = async () => {
       'SELECT * FROM bitcoin ORDER BY id DESC LIMIT 1'
     );
     db.end();
+    console.log(rows);
     return rows[0];
   } catch (error) {
     console.log(error);
@@ -30,7 +31,7 @@ const writeData = async (...args) => {
     const db = await getDB();
     await db.connect();
     const { rows } = await db.query(
-      'insert into bitcoin(timestamp,maindata) values($1,$2)',
+      'insert into bitcoin(timestamp,maindata,metadata) values($1,$2,$3)',
       args
     );
     console.log('inserting into db');

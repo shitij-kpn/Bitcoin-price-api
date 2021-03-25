@@ -66,7 +66,6 @@ const getData = async () => {
   }
 
   ///write data to database
-  await writeData(time, JSON.stringify(data));
 
   const allData = await readAllData();
   const metaData = {
@@ -136,6 +135,8 @@ const getData = async () => {
   metaData.one_week /= one_week_length;
   metaData.one_week = (((metaData.one_week - avg) / avg) * 100).toFixed(2);
 
+  await writeData(time, JSON.stringify(data), JSON.stringify(metaData));
+
   console.log({ metaData });
   if (clients.length > 0) {
     console.log('broadcasting');
@@ -174,6 +175,7 @@ app.get('/', async (req, res) => {
     console.log('rendering');
     res.render('index', {
       data: data.maindata,
+      metaData: data.metadata,
       timer,
     });
   } catch (error) {
