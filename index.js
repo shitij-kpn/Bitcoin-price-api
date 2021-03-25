@@ -13,7 +13,7 @@ const io = socketio(server);
 const cors = require('cors');
 
 //importing util modules
-// const getBitbns = require('./utils/bitbnsapi');
+const getBitbns = require('./utils/bitbnsapi');
 const getWazirxData = require('./utils/wazirxapi');
 const getGiottusData = require('./utils/giottusapi');
 const getColodaxData = require('./utils/colodaxapi');
@@ -21,7 +21,7 @@ const getZebpayData = require('./utils/zebpayapi');
 const getCoindcxData = require('./utils/coindcxapi');
 
 //importing database modules
-// const { writeData, readData } = require('./db/database');
+const { writeData, readData, readAllData } = require('./db/database');
 
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'pug');
@@ -36,6 +36,7 @@ const getData = async (time = new Date().getTime()) => {
   console.log('fetching new data');
 
   const data = await Promise.all([
+    getBitbns(),
     getWazirxData(),
     getGiottusData(),
     getColodaxData(),
@@ -46,7 +47,7 @@ const getData = async (time = new Date().getTime()) => {
   //calculate avg of last sell
   let avg = 0;
   for (i in data) {
-    avg = avg + parseInt(data[i].last);
+    avg = avg + Number(data[i].last);
   }
   avg /= data.length;
 
@@ -63,12 +64,77 @@ const getData = async (time = new Date().getTime()) => {
   for (i in data) {
     data[i].index = Number(i) + 1;
   }
-  ///write data to database
-  // await writeData(time, JSON.stringify(data));
 
+  ///write data to database
+  await writeData(time, JSON.stringify(data));
+
+  const allData = await readAllData();
+
+  const metaData = {
+    average: avg.toFixed(2),
+    five_minute: 0,
+    one_hour: 0,
+    one_day: 0,
+    one_week: 0,
+  };
+  let f_length = 0,
+    one_hour_length = 0,
+    one_day_length = 0,
+    one_week_length = 0;
+  for (i in allData) {
+    if (Number(allData[i].timestamp) > time - 5 * 60000) {
+      for (j in allData[i].maindata) {
+        metaData.five_minute += Number(allData[i].maindata[j].last);
+        f_length++;
+      }
+    }
+    if (Number(allData[i].timestamp) > time - 60 * 60000) {
+      for (j in allData[i].maindata) {
+        metaData.one_hour += Number(allData[i].maindata[j].last);
+        one_hour_length++;
+      }
+    }
+    if (Number(allData[i].timestamp) > time - 24 * 60 * 60000) {
+      for (j in allData[i].maindata) {
+        metaData.one_day += Number(allData[i].maindata[j].last);
+        one_day_length++;
+      }
+    }
+    if (Number(allData[i].timestamp) > time - 7 * 24 * 60 * 60000) {
+      for (j in allData[i].maindata) {
+        metaData.one_week += Number(allData[i].maindata[j].last);
+        one_week_length++;
+      }
+    }
+  }
+  metaData.five_minute /= f_length;
+  metaData.five_minute = (
+    ((metaData.five_minute - avg) / metaData.five_minute) *
+    100
+  ).toFixed(2);
+
+  metaData.one_hour /= one_hour_length;
+  metaData.one_hour = (
+    ((metaData.one_hour - avg) / metaData.one_hour) *
+    100
+  ).toFixed(2);
+
+  metaData.one_day /= one_day_length;
+  metaData.one_day = (
+    ((metaData.one_day - avg) / metaData.one_day) *
+    100
+  ).toFixed(2);
+
+  metaData.one_week /= one_week_length;
+  metaData.one_week = (
+    ((metaData.one_week - avg) / metaData.one_week) *
+    100
+  ).toFixed(2);
+
+  console.log(metaData);
   if (clients.length > 0) {
     console.log('broadcasting');
-    io.sockets.emit('newData', { data });
+    io.sockets.emit('newData', { data, metaData });
   } else {
     console.log('there are no clients');
   }
@@ -82,8 +148,8 @@ setInterval(() => {
 io.on('connect', async (socket) => {
   console.log('user Connected');
   clients = [...clients, socket];
-  // const data = await readData();
-  // socket.emit('initialData', { data });
+  const data = await readData();
+  socket.emit('initialData', { data });
   socket.on('disconnect', () => {
     console.log('user disconnected');
     clients = clients.filter((user) => user.id !== socket.id);
@@ -98,10 +164,10 @@ setInterval(() => {
 
 app.get('/', async (req, res) => {
   try {
-    // const data = await readData();
+    const data = await readData();
     console.log('rendering');
     res.render('index', {
-      // data: data.maindata,
+      data: data.maindata,
       timer,
     });
   } catch (error) {

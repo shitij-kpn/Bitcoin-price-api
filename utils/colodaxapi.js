@@ -5,9 +5,9 @@ const getColodaxData = async () => {
   const btcColodax = colodax.data.BTC_INR;
   return {
     platform: 'Colodax',
-    last: Math.floor(btcColodax.last_price),
-    buy: Math.floor(btcColodax.highestBid),
-    sell: Math.floor(btcColodax.lowestAsk),
+    last: Math.floor(btcColodax.last_price).toString(),
+    buy: Math.floor(btcColodax.highestBid).toString(),
+    sell: Math.floor(btcColodax.lowestAsk).toString(),
   };
 };
 
