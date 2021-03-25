@@ -32,9 +32,9 @@ app.use(cors);
 let clients = [];
 let timer = 60;
 
-const getData = async (time = new Date().getTime()) => {
+const getData = async () => {
   console.log('fetching new data');
-
+  const time = new Date().getTime();
   const data = await Promise.all([
     getBitbns(),
     getWazirxData(),
@@ -69,7 +69,6 @@ const getData = async (time = new Date().getTime()) => {
   await writeData(time, JSON.stringify(data));
 
   const allData = await readAllData();
-
   const metaData = {
     average: avg.toFixed(2),
     five_minute: 0,
@@ -81,57 +80,63 @@ const getData = async (time = new Date().getTime()) => {
     one_hour_length = 0,
     one_day_length = 0,
     one_week_length = 0;
+
+  const times = {
+    t_5_minute: time - 5 * 60000,
+    t_1_day: time - 24 * 60 * 60000,
+    t_1_hour: time - 60 * 60000,
+    t_1_week: time - 7 * 24 * 60 * 60000,
+  };
+
   for (i in allData) {
-    if (Number(allData[i].timestamp) > time - 5 * 60000) {
+    if (parseInt(allData[i].timestamp) > times.t_5_minute) {
       for (j in allData[i].maindata) {
-        metaData.five_minute += Number(allData[i].maindata[j].last);
+        metaData.five_minute += parseInt(allData[i].maindata[j].last);
         f_length++;
       }
     }
-    if (Number(allData[i].timestamp) > time - 60 * 60000) {
+  }
+
+  metaData.five_minute /= f_length;
+  metaData.five_minute = (((metaData.five_minute - avg) / avg) * 100).toFixed(
+    2
+  );
+
+  for (i in allData) {
+    if (parseInt(allData[i].timestamp) > times.t_1_hour) {
       for (j in allData[i].maindata) {
-        metaData.one_hour += Number(allData[i].maindata[j].last);
+        metaData.one_hour += parseInt(allData[i].maindata[j].last);
         one_hour_length++;
       }
     }
-    if (Number(allData[i].timestamp) > time - 24 * 60 * 60000) {
+  }
+  metaData.one_hour /= one_hour_length;
+  metaData.one_hour = (((metaData.one_hour - avg) / avg) * 100).toFixed(2);
+
+  for (i in allData) {
+    if (parseInt(allData[i].timestamp) > times.t_1_day) {
       for (j in allData[i].maindata) {
-        metaData.one_day += Number(allData[i].maindata[j].last);
+        metaData.one_day += parseInt(allData[i].maindata[j].last);
         one_day_length++;
       }
     }
-    if (Number(allData[i].timestamp) > time - 7 * 24 * 60 * 60000) {
+  }
+  metaData.one_day /= one_day_length;
+  metaData.one_day = (((metaData.one_day - avg) / avg) * 100).toFixed(2);
+
+  for (i in allData) {
+    if (parseInt(allData[i].timestamp) > times.t_1_week) {
       for (j in allData[i].maindata) {
-        metaData.one_week += Number(allData[i].maindata[j].last);
+        metaData.one_week += parseInt(allData[i].maindata[j].last);
         one_week_length++;
       }
     }
   }
-  metaData.five_minute /= f_length;
-  metaData.five_minute = (
-    ((metaData.five_minute - avg) / metaData.five_minute) *
-    100
-  ).toFixed(2);
-
-  metaData.one_hour /= one_hour_length;
-  metaData.one_hour = (
-    ((metaData.one_hour - avg) / metaData.one_hour) *
-    100
-  ).toFixed(2);
-
-  metaData.one_day /= one_day_length;
-  metaData.one_day = (
-    ((metaData.one_day - avg) / metaData.one_day) *
-    100
-  ).toFixed(2);
 
   metaData.one_week /= one_week_length;
-  metaData.one_week = (
-    ((metaData.one_week - avg) / metaData.one_week) *
-    100
-  ).toFixed(2);
+  metaData.one_week = (((metaData.one_week - avg) / avg) * 100).toFixed(2);
 
-  console.log(metaData);
+  console.log({ metaData });
   if (clients.length > 0) {
     console.log('broadcasting');
     io.sockets.emit('newData', { data, metaData });
@@ -164,6 +169,7 @@ setInterval(() => {
 
 app.get('/', async (req, res) => {
   try {
+    console.log('request made');
     const data = await readData();
     console.log('rendering');
     res.render('index', {
@@ -180,5 +186,5 @@ app.get('/', async (req, res) => {
 
 server.listen(8080, () => {
   getData();
-  console.log('running on 8090');
+  console.log('running on 8080');
 });

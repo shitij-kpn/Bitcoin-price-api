@@ -33,7 +33,7 @@ const writeData = async (...args) => {
       'insert into bitcoin(timestamp,maindata) values($1,$2)',
       args
     );
-    console.log('insterting into db');
+    console.log('inserting into db');
     db.end();
     return rows;
   } catch (error) {
