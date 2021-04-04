@@ -1,15 +1,5 @@
-const { Pool } = require('pg');
-
-const getDB = async () => {
-  return new Pool({
-    connectionString: process.env.DATABASE_URL,
-    ssl: { rejectUnauthorized: false },
-  });
-};
-
-const readData = async () => {
+const readData = async (db) => {
   try {
-    const db = await getDB();
     await db.connect();
     const { rows } = await db.query(
       'SELECT * FROM bitcoin ORDER BY id DESC LIMIT 1'
@@ -25,9 +15,8 @@ const readData = async () => {
   }
 };
 
-const writeData = async (...args) => {
+const writeData = async (db, ...args) => {
   try {
-    const db = await getDB();
     await db.connect();
     const { rows } = await db.query(
       'insert into bitcoin(timestamp,maindata,metadata) values($1,$2,$3)',
@@ -42,9 +31,8 @@ const writeData = async (...args) => {
   }
 };
 
-const readAllData = async () => {
+const readAllData = async (db) => {
   try {
-    const db = await getDB();
     await db.connect();
     const { rows } = await db.query('SELECT * FROM bitcoin ORDER BY id DESC');
     db.end();
