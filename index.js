@@ -27,8 +27,10 @@ const { writeData, readData, readAllData } = require('./db/database');
 
 const { Pool } = require('pg');
 
-const DB = (async () => {
-  return new Pool({
+let DB;
+
+(async () => {
+  DB = await new Pool({
     connectionString: process.env.DATABASE_URL,
     ssl: { rejectUnauthorized: false },
   });
