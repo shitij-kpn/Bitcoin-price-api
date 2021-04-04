@@ -22,12 +22,7 @@ const getZebpayData = require('./utils/zebpayapi');
 const getCoindcxData = require('./utils/coindcxapi');
 
 //importing database modules
-
 const { writeData, readData, readAllData } = require('./db/database');
-
-const { Pool } = require('pg');
-
-let DB;
 
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'pug');
@@ -73,7 +68,7 @@ const getData = async () => {
 
   ///write data to database
 
-  const allData = await readAllData(DB);
+  const allData = await readAllData();
   const metaData = {
     average: avg.toFixed(2),
     five_minute: 0,
@@ -141,7 +136,7 @@ const getData = async () => {
   metaData.one_week /= one_week_length;
   metaData.one_week = (((metaData.one_week - avg) / avg) * 100).toFixed(2);
 
-  await writeData(DB, time, JSON.stringify(data), JSON.stringify(metaData));
+  await writeData(time, JSON.stringify(data), JSON.stringify(metaData));
 
   console.log({ metaData });
   if (clients.length > 0) {
@@ -160,7 +155,7 @@ setInterval(() => {
 io.on('connect', async (socket) => {
   console.log('user Connected');
   clients = [...clients, socket];
-  const data = await readData(DB);
+  const data = await readData();
   socket.emit('initialData', { data });
   socket.on('disconnect', () => {
     console.log('user disconnected');
@@ -177,7 +172,7 @@ setInterval(() => {
 app.get('/', async (req, res) => {
   try {
     console.log('request made');
-    const data = await readData(DB);
+    const data = await readData();
     console.log('rendering');
     res.render('index', {
       data: data.maindata,
@@ -192,11 +187,7 @@ app.get('/', async (req, res) => {
   }
 });
 
-server.listen(process.env.PORT, async () => {
-  DB = await new Pool({
-    connectionString: process.env.DATABASE_URL,
-    ssl: { rejectUnauthorized: false },
-  });
-  getData(DB);
+server.listen(process.env.PORT, () => {
+  getData();
   console.log('running on port: ' + process.env.PORT);
 });
