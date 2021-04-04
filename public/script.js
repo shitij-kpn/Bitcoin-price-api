@@ -1,4 +1,4 @@
-const socket = io('http://localhost:8090');
+const socket = io('https://shitij.herokuapp.com');
 const tableRows = document.querySelector('tbody');
 const timer = document.querySelector('#timer');
 const checkbox = document.querySelector('input[name=themeChange]');
