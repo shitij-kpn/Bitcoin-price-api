@@ -1,10 +1,8 @@
-const { Client } = require('pg');
+const { Pool } = require('pg');
 
 const getDB = async () => {
-  return new Client({
-    connectionString:
-      process.env.DATABASE_URL ||
-      'postgres://postgres:endencre@localhost:5432/postgres',
+  return new Pool({
+    connectionString: process.env.DATABASE_URL,
   });
 };
 

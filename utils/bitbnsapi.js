@@ -1,8 +1,8 @@
 const bitbnsApi = require('bitbns');
 
 const bitbns = new bitbnsApi({
-  apiKey: '41A5218EE6ECAE9BDFBBF77B120749AA',
-  apiSecretKey: '16A7688692031EC59E5DDC3177B11A60',
+  apiKey: process.env.BITBNS_KEY,
+  apiSecretKey: process.env.BITBNS_SECRET,
 });
 
 const getBitbns = async () => {

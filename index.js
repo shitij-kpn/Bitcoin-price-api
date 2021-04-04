@@ -8,6 +8,7 @@ const server = require('http').createServer(
     cors: true,
   })
 );
+
 const io = socketio(server);
 
 const cors = require('cors');
