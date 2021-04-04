@@ -1,7 +1,7 @@
-const { Pool } = require('pg');
+const { Client } = require('pg');
 
 const getDB = async () => {
-  return new Pool({
+  return new Client({
     connectionString: process.env.DATABASE_URL,
     ssl: { rejectUnauthorized: false },
   });
