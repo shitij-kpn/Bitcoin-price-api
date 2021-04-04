@@ -29,13 +29,6 @@ const { Pool } = require('pg');
 
 let DB;
 
-(async () => {
-  DB = await new Pool({
-    connectionString: process.env.DATABASE_URL,
-    ssl: { rejectUnauthorized: false },
-  });
-})();
-
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'pug');
 app.use(express.static(path.join(__dirname, 'public')));
@@ -199,7 +192,11 @@ app.get('/', async (req, res) => {
   }
 });
 
-server.listen(process.env.PORT, () => {
-  getData();
+server.listen(process.env.PORT, async () => {
+  DB = await new Pool({
+    connectionString: process.env.DATABASE_URL,
+    ssl: { rejectUnauthorized: false },
+  });
+  getData(DB);
   console.log('running on port: ' + process.env.PORT);
 });
