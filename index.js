@@ -187,7 +187,7 @@ app.get('/', async (req, res) => {
   }
 });
 
-server.listen(8080, () => {
+server.listen(process.env.PORT, () => {
   getData();
   console.log('running on 8080');
 });
